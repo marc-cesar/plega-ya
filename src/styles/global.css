@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@layer base {
+	html { @apply scroll-smooth motion-reduce:scroll-auto; }
+	input:focus-visible, button:focus-visible, a:focus-visible { @apply outline-3 -outline-offset-3 outline-[#ffca58]; }
+}
+
+@layer components {
+	.site-header, main, .site-footer { @apply mx-auto w-[min(100%-2rem,68rem)]; }
+	.site-header { @apply flex items-center justify-between py-5; }
+	.brand { @apply font-extrabold tracking-[-.04em] no-underline; }
+	.privacy-note { @apply m-0 text-[.82rem] text-[#536057] max-sm:hidden; }
+	.hero { @apply max-w-[46rem] pt-9 pb-7 sm:pt-14; }
+	h1 { @apply mb-[.65rem] text-[clamp(2.5rem,8vw,5rem)] leading-[.95] tracking-[-.07em]; }
+	.lead { @apply max-w-[34rem] text-[clamp(1.05rem,2vw,1.25rem)] leading-6 text-[#536057]; }
+	.calculator { @apply rounded-[1.25rem] border-[.35rem] border-[#1a241d] bg-[#27372c] p-[clamp(1rem,3vw,2rem)] text-[#f9f7ec] shadow-[.55rem_.55rem_0_#c7c4ae]; }
+	.inputs { @apply grid grid-cols-1 gap-[.9rem] sm:grid-cols-3; }
+	label { @apply grid gap-[.4rem] text-[.82rem] font-bold; }
+	input { @apply min-h-12 w-full rounded-[.45rem] border-2 border-[#829184] bg-[#e7eddc] px-[.55rem] py-[.45rem] text-[#17221a]; }
+	.presets { @apply my-[1.1rem] flex flex-wrap gap-[.55rem]; }
+	.preset, .reset { @apply rounded-full border border-[#829184] bg-transparent px-3 py-[.45rem] text-[.82rem] hover:bg-[#3d5042]; }
+	.clock { @apply mt-4 grid min-h-[clamp(13rem,35vw,18rem)] place-content-center rounded-[.7rem] border-2 border-[#8ca072] bg-[#d6dfbd] text-center text-[#23311f]; }
+	.clock-label { @apply mb-2 text-[.8rem] font-extrabold tracking-[.14em]; }
+	.clock-time { @apply font-mono text-[clamp(3.2rem,12vw,7.25rem)] leading-[.9] font-bold tracking-[-.1em] tabular-nums; }
+	.end-time { @apply mt-4 text-[.92rem]; }
+	.reset { @apply mx-auto mt-4 block; }
+	.content { @apply grid gap-11 py-20; }
+	.content section { @apply max-w-[44rem]; }
+	h2 { @apply text-[clamp(1.55rem,4vw,2.25rem)] tracking-[-.045em]; }
+	.formula { @apply flex flex-wrap items-center gap-[.45rem] font-mono text-base font-bold; }
+	.formula span { @apply rounded-[.4rem] bg-[#dfe5cf] px-[.8rem] py-[.6rem]; }
+	.examples, .faq { @apply grid gap-[.9rem]; }
+	.example, details { @apply border-l-[3px] border-[#718554] bg-[#e9e8da] px-4 py-[.8rem]; }
+	.example p { @apply m-0; }
+	summary { @apply cursor-pointer font-bold; }
+	details p { @apply mt-[.7rem] mb-0 leading-relaxed text-[#536057]; }
+	.site-footer { @apply py-6 pb-10 text-[.85rem] text-[#536057]; }
+}

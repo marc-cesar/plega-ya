@@ -1,11 +1,169 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const title = '¿A qué hora me puedo ir? — Calculadora de horas de trabajo';
+const description =
+	'Calcula a qué hora termina tu jornada y cuánto tiempo te queda para irte. Introduce tu hora de entrada, jornada y descanso.';
 ---
 
-<Layout>
-	<Welcome />
+<Layout {title} {description}>
+	<header class="site-header">
+		<a class="brand" href="/">PLEGA YA</a>
+		<p class="privacy-note">Tus horarios se calculan en tu navegador.</p>
+	</header>
+
+	<main>
+		<section class="hero" aria-labelledby="page-title">
+			<h1 id="page-title">¿A qué hora me puedo ir?</h1>
+			<p class="lead">Calcula a qué hora termina tu jornada y cuánto tiempo te queda para irte.</p>
+		</section>
+
+		<section class="calculator" aria-label="Calculadora de hora de salida">
+			<div class="inputs">
+				<label for="start">Hora de entrada <input id="start" name="start" type="time" required /></label>
+				<label for="work">Jornada <input id="work" name="work" type="time" value="08:00" required /></label>
+				<label for="break">Descanso <input id="break" name="break" type="time" value="00:30" required /></label>
+			</div>
+			<div class="presets" aria-label="Ajustes rápidos">
+				<button class="preset" type="button" data-work="08:00">Jornada: 8 h</button>
+				<button class="preset" type="button" data-work="07:30">Jornada: 7 h 30 min</button>
+				<button class="preset" type="button" data-break="00:00">Sin descanso</button>
+				<button class="preset" type="button" data-break="00:15">Descanso: 15 min</button>
+				<button class="preset" type="button" data-break="00:30">Descanso: 30 min</button>
+			</div>
+			<div class="clock">
+				<p id="clock-label" class="clock-label">INTRODUCE TU HORARIO</p>
+				<p id="clock-time" class="clock-time" aria-hidden="true">--:--:--</p>
+				<p id="end-time" class="end-time">La hora de salida aparecerá aquí.</p>
+			</div>
+			<button id="reset" class="reset" type="button">Restablecer horario</button>
+		</section>
+
+		<div class="content">
+			<section aria-labelledby="how-it-works">
+				<h2 id="how-it-works">¿Cómo calcular a qué hora me puedo ir?</h2>
+				<p>Introduce la hora a la que has empezado, las horas que debes trabajar y el descanso que no cuenta como jornada. La calculadora suma los tres valores y actualiza el tiempo restante con el reloj real.</p>
+				<div class="formula" aria-label="Fórmula de cálculo">
+					<span>Entrada</span><strong>+</strong><span>Jornada</span><strong>+</strong><span>Descanso</span><strong>=</strong><span>Salida</span>
+				</div>
+			</section>
+
+			<section aria-labelledby="examples">
+				<h2 id="examples">Ejemplos</h2>
+				<div class="examples">
+					<div class="example"><strong>Entrada a las 08:00 + 8 h</strong><p>Salida a las 16:00.</p></div>
+					<div class="example"><strong>Entrada a las 08:30 + 8 h + 30 min</strong><p>Salida a las 17:00.</p></div>
+					<div class="example"><strong>Entrada a las 22:00 + 8 h + 30 min</strong><p>Salida a las 06:30 del día siguiente.</p></div>
+				</div>
+			</section>
+
+			<section aria-labelledby="faq">
+				<h2 id="faq">Preguntas frecuentes</h2>
+				<div class="faq">
+					<details><summary>¿El descanso cuenta como tiempo trabajado?</summary><p>Depende de tus condiciones laborales. Añádelo a la calculadora cuando no forme parte de tu jornada efectiva.</p></details>
+					<details><summary>¿Funciona si termino al día siguiente?</summary><p>Sí. La hora de salida se calcula a partir de un instante real, así que también contempla el cruce de medianoche.</p></details>
+					<details><summary>¿Se guardan mis horarios?</summary><p>Se recuerdan únicamente en el almacenamiento local de este navegador. No se envían a ningún servidor.</p></details>
+				</div>
+			</section>
+		</div>
+	</main>
+
+	<footer class="site-footer">Una calculadora sencilla para saber cuándo toca plegar.</footer>
 </Layout>
+
+<script>
+	import { formatClock, formatTime, getEndTimestamp } from '../lib/time';
+
+	const start = document.querySelector<HTMLInputElement>('#start')!;
+	const work = document.querySelector<HTMLInputElement>('#work')!;
+	const breakDuration = document.querySelector<HTMLInputElement>('#break')!;
+	const clockLabel = document.querySelector<HTMLElement>('#clock-label')!;
+	const clockTime = document.querySelector<HTMLElement>('#clock-time')!;
+	const endTime = document.querySelector<HTMLElement>('#end-time')!;
+	const reset = document.querySelector<HTMLButtonElement>('#reset')!;
+	const inputs = [start, work, breakDuration];
+	const storageKey = 'plega-ya-schedule';
+	let endTimestamp: number | null = null;
+
+	function setInitialStartTime() {
+		const now = new Date();
+		now.setMinutes(Math.floor(now.getMinutes() / 5) * 5, 0, 0);
+		start.value = now.toTimeString().slice(0, 5);
+	}
+
+	function saveSchedule() {
+		localStorage.setItem(storageKey, JSON.stringify({ start: start.value, work: work.value, break: breakDuration.value }));
+	}
+
+	function update() {
+		endTimestamp = getEndTimestamp(start.value, work.value, breakDuration.value);
+		if (endTimestamp === null) {
+			clockLabel.textContent = 'INTRODUCE TU HORARIO';
+			clockTime.textContent = '--:--:--';
+			endTime.textContent = 'La hora de salida aparecerá aquí.';
+			return;
+		}
+
+		saveSchedule();
+		endTime.textContent = `Tu hora de salida es las ${formatTime(endTimestamp)}.`;
+		refreshClock();
+	}
+
+	function refreshClock() {
+		if (endTimestamp === null) return;
+
+		const remaining = endTimestamp - Date.now();
+		clockTime.textContent = formatClock(remaining);
+		clockLabel.textContent = remaining <= 0 ? 'TE PUEDES IR' : 'TE QUEDAN';
+	}
+
+	function restoreSchedule() {
+		const saved = localStorage.getItem(storageKey);
+		if (!saved) {
+			setInitialStartTime();
+			return;
+		}
+
+		try {
+			const schedule: unknown = JSON.parse(saved);
+			if (
+				typeof schedule === 'object' &&
+				schedule !== null &&
+				'start' in schedule &&
+				'work' in schedule &&
+				'break' in schedule &&
+				typeof schedule.start === 'string' &&
+				typeof schedule.work === 'string' &&
+				typeof schedule.break === 'string'
+			) {
+				start.value = schedule.start;
+				work.value = schedule.work;
+				breakDuration.value = schedule.break;
+				return;
+			}
+		} catch {
+			// Invalid local preferences are replaced by a safe initial value.
+		}
+		setInitialStartTime();
+	}
+
+	document.querySelectorAll<HTMLButtonElement>('.preset').forEach((button) => {
+		button.addEventListener('click', () => {
+			if (button.dataset.work) work.value = button.dataset.work;
+			if (button.dataset.break) breakDuration.value = button.dataset.break;
+			update();
+		});
+	});
+	inputs.forEach((input) => input.addEventListener('input', update));
+	reset.addEventListener('click', () => {
+		localStorage.removeItem(storageKey);
+		work.value = '08:00';
+		breakDuration.value = '00:30';
+		setInitialStartTime();
+		update();
+	});
+
+	restoreSchedule();
+	update();
+	window.setInterval(refreshClock, 1000);
+</script>
