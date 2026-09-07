@@ -1,5 +1,7 @@
 export const MINUTE = 60_000;
 export const SECOND = 1_000;
+export const URGENT_THRESHOLD_MS = 5 * MINUTE;
+export const JUST_FINISHED_THRESHOLD_MS = 1 * MINUTE;
 
 export function timeToMinutes(value: string): number | null {
 	const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(value);
@@ -11,7 +13,13 @@ export function timeToMinutes(value: string): number | null {
 	return Number(match[1]) * 60 + Number(match[2]);
 }
 
-export function getEndTimestamp(start: string, work: string, breakDuration: string): number | null {
+export interface Schedule {
+	startTimestamp: number;
+	endTimestamp: number;
+	crossesMidnight: boolean;
+}
+
+export function getSchedule(start: string, work: string, breakDuration: string): Schedule | null {
 	const startMinutes = timeToMinutes(start);
 	const workMinutes = timeToMinutes(work);
 	const breakMinutes = timeToMinutes(breakDuration);
@@ -30,8 +38,15 @@ export function getEndTimestamp(start: string, work: string, breakDuration: stri
 		0,
 		0,
 	);
+	const startTimestamp = startTime.getTime();
+	const endTimestamp = startTimestamp + (workMinutes + breakMinutes) * MINUTE;
+	const crossesMidnight = new Date(endTimestamp).getDate() !== new Date(startTimestamp).getDate();
 
-	return startTime.getTime() + (workMinutes + breakMinutes) * MINUTE;
+	return { startTimestamp, endTimestamp, crossesMidnight };
+}
+
+export function getEndTimestamp(start: string, work: string, breakDuration: string): number | null {
+	return getSchedule(start, work, breakDuration)?.endTimestamp ?? null;
 }
 
 export function formatClock(milliseconds: number): string {

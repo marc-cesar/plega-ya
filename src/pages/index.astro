@@ -20,21 +20,44 @@ const description =
 
 		<section class="calculator" aria-label="Calculadora de hora de salida">
 			<div class="inputs">
-				<label for="start">Hora de entrada <input id="start" name="start" type="time" required /></label>
-				<label for="work">Jornada <input id="work" name="work" type="time" value="08:00" required /></label>
-				<label for="break">Descanso <input id="break" name="break" type="time" value="00:30" required /></label>
+				<label for="start">
+					Hora de entrada <input id="start" name="start" type="time" required aria-describedby="start-hint" />
+					<span id="start-hint" class="input-hint">Hora a la que empiezas tu turno.</span>
+				</label>
+				<label for="work">
+					Jornada <input id="work" name="work" type="time" value="08:00" required aria-describedby="work-hint" />
+					<span id="work-hint" class="input-hint">Duración a trabajar, no una hora del día.</span>
+				</label>
+				<label for="break">
+					Descanso <input id="break" name="break" type="time" value="00:30" required aria-describedby="break-hint" />
+					<span id="break-hint" class="input-hint">Duración que no cuenta como jornada.</span>
+				</label>
 			</div>
-			<div class="presets" aria-label="Ajustes rápidos">
-				<button class="preset" type="button" data-work="08:00">Jornada: 8 h</button>
-				<button class="preset" type="button" data-work="07:30">Jornada: 7 h 30 min</button>
-				<button class="preset" type="button" data-break="00:00">Sin descanso</button>
-				<button class="preset" type="button" data-break="00:15">Descanso: 15 min</button>
-				<button class="preset" type="button" data-break="00:30">Descanso: 30 min</button>
+			<div class="presets">
+				<div class="preset-group">
+					<span class="preset-group-label" id="work-presets-label">Jornada</span>
+					<div class="preset-buttons" role="group" aria-labelledby="work-presets-label">
+						<button class="preset" type="button" data-work="08:00" aria-pressed="true">8 h</button>
+						<button class="preset" type="button" data-work="07:30" aria-pressed="false">7 h 30 min</button>
+						<button class="preset" type="button" data-work="07:00" aria-pressed="false">7 h</button>
+						<button class="preset" type="button" data-work="06:00" aria-pressed="false">6 h</button>
+					</div>
+				</div>
+				<div class="preset-group">
+					<span class="preset-group-label" id="break-presets-label">Descanso</span>
+					<div class="preset-buttons" role="group" aria-labelledby="break-presets-label">
+						<button class="preset" type="button" data-break="00:00" aria-pressed="false">Sin descanso</button>
+						<button class="preset" type="button" data-break="00:15" aria-pressed="false">15 min</button>
+						<button class="preset" type="button" data-break="00:30" aria-pressed="true">30 min</button>
+						<button class="preset" type="button" data-break="00:45" aria-pressed="false">45 min</button>
+						<button class="preset" type="button" data-break="01:00" aria-pressed="false">1 h</button>
+					</div>
+				</div>
 			</div>
 			<div class="clock">
-				<p id="clock-label" class="clock-label">INTRODUCE TU HORARIO</p>
+				<p id="clock-label" class="clock-label" aria-live="polite">INTRODUCE TU HORARIO</p>
 				<p id="clock-time" class="clock-time" aria-hidden="true">--:--:--</p>
-				<p id="end-time" class="end-time">La hora de salida aparecerá aquí.</p>
+				<p id="end-time" class="end-time" aria-live="polite">La hora de salida aparecerá aquí.</p>
 			</div>
 			<button id="reset" class="reset" type="button">Restablecer horario</button>
 		</section>
@@ -72,15 +95,17 @@ const description =
 </Layout>
 
 <script>
-	import { formatClock, formatTime, getEndTimestamp } from '../lib/time';
+	import { formatClock, formatTime, getSchedule, URGENT_THRESHOLD_MS, JUST_FINISHED_THRESHOLD_MS } from '../lib/time';
 
 	const start = document.querySelector<HTMLInputElement>('#start')!;
 	const work = document.querySelector<HTMLInputElement>('#work')!;
 	const breakDuration = document.querySelector<HTMLInputElement>('#break')!;
+	const clock = document.querySelector<HTMLElement>('.clock')!;
 	const clockLabel = document.querySelector<HTMLElement>('#clock-label')!;
 	const clockTime = document.querySelector<HTMLElement>('#clock-time')!;
 	const endTime = document.querySelector<HTMLElement>('#end-time')!;
 	const reset = document.querySelector<HTMLButtonElement>('#reset')!;
+	const presetButtons = document.querySelectorAll<HTMLButtonElement>('.preset');
 	const inputs = [start, work, breakDuration];
 	const storageKey = 'plega-ya-schedule';
 	let endTimestamp: number | null = null;
@@ -95,17 +120,33 @@ const description =
 		localStorage.setItem(storageKey, JSON.stringify({ start: start.value, work: work.value, break: breakDuration.value }));
 	}
 
+	function updatePresetStates() {
+		presetButtons.forEach((button) => {
+			const matches =
+				(button.dataset.work !== undefined && button.dataset.work === work.value) ||
+				(button.dataset.break !== undefined && button.dataset.break === breakDuration.value);
+			button.setAttribute('aria-pressed', String(matches));
+		});
+	}
+
 	function update() {
-		endTimestamp = getEndTimestamp(start.value, work.value, breakDuration.value);
-		if (endTimestamp === null) {
+		const schedule = getSchedule(start.value, work.value, breakDuration.value);
+		updatePresetStates();
+
+		if (schedule === null) {
+			endTimestamp = null;
 			clockLabel.textContent = 'INTRODUCE TU HORARIO';
 			clockTime.textContent = '--:--:--';
 			endTime.textContent = 'La hora de salida aparecerá aquí.';
+			clock.classList.remove('is-urgent', 'is-done');
 			return;
 		}
 
+		endTimestamp = schedule.endTimestamp;
 		saveSchedule();
-		endTime.textContent = `Tu hora de salida es las ${formatTime(endTimestamp)}.`;
+		endTime.textContent = schedule.crossesMidnight
+			? `Tu hora de salida es las ${formatTime(endTimestamp)} del día siguiente.`
+			: `Tu hora de salida es las ${formatTime(endTimestamp)}.`;
 		refreshClock();
 	}
 
@@ -113,8 +154,27 @@ const description =
 		if (endTimestamp === null) return;
 
 		const remaining = endTimestamp - Date.now();
-		clockTime.textContent = formatClock(remaining);
-		clockLabel.textContent = remaining <= 0 ? 'TE PUEDES IR' : 'TE QUEDAN';
+
+		if (remaining > 0) {
+			clockTime.textContent = formatClock(remaining);
+			clockLabel.textContent = 'TE QUEDAN';
+			clock.classList.toggle('is-urgent', remaining <= URGENT_THRESHOLD_MS);
+			clock.classList.remove('is-done');
+			return;
+		}
+
+		const overtime = Math.abs(remaining);
+		clock.classList.remove('is-urgent');
+		clock.classList.add('is-done');
+
+		if (overtime < JUST_FINISHED_THRESHOLD_MS) {
+			clockTime.textContent = '00:00:00';
+			clockLabel.textContent = 'TE PUEDES IR';
+			return;
+		}
+
+		clockTime.textContent = formatClock(overtime);
+		clockLabel.textContent = 'YA TE PODRÍAS HABER IDO';
 	}
 
 	function restoreSchedule() {
@@ -147,7 +207,7 @@ const description =
 		setInitialStartTime();
 	}
 
-	document.querySelectorAll<HTMLButtonElement>('.preset').forEach((button) => {
+	presetButtons.forEach((button) => {
 		button.addEventListener('click', () => {
 			if (button.dataset.work) work.value = button.dataset.work;
 			if (button.dataset.break) breakDuration.value = button.dataset.break;

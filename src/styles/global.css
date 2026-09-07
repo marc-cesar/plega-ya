@@ -11,15 +11,22 @@
 	.brand { @apply font-extrabold tracking-[-.04em] no-underline; }
 	.privacy-note { @apply m-0 text-[.82rem] text-[#536057] max-sm:hidden; }
 	.hero { @apply max-w-[46rem] pt-9 pb-7 sm:pt-14; }
-	h1 { @apply mb-[.65rem] text-[clamp(2.5rem,8vw,5rem)] leading-[.95] tracking-[-.07em]; }
-	.lead { @apply max-w-[34rem] text-[clamp(1.05rem,2vw,1.25rem)] leading-6 text-[#536057]; }
+	h1 { @apply mb-3 text-[clamp(2.5rem,8vw,5rem)] leading-[.95] tracking-[-.07em] [text-wrap:balance]; }
+	.lead { @apply max-w-[34rem] text-[clamp(1.05rem,2vw,1.25rem)] leading-7 text-[#536057] [text-wrap:pretty]; }
 	.calculator { @apply rounded-[1.25rem] border-[.35rem] border-[#1a241d] bg-[#27372c] p-[clamp(1rem,3vw,2rem)] text-[#f9f7ec] shadow-[.55rem_.55rem_0_#c7c4ae]; }
 	.inputs { @apply grid grid-cols-1 gap-[.9rem] sm:grid-cols-3; }
 	label { @apply grid gap-[.4rem] text-[.82rem] font-bold; }
+	.input-hint { @apply text-[.72rem] font-normal text-[#b9c3aa]; }
 	input { @apply min-h-12 w-full rounded-[.45rem] border-2 border-[#829184] bg-[#e7eddc] px-[.55rem] py-[.45rem] text-[#17221a]; }
-	.presets { @apply my-[1.1rem] flex flex-wrap gap-[.55rem]; }
+	.presets { @apply my-[1.1rem] grid gap-[.7rem]; }
+	.preset-group { @apply flex flex-wrap items-center gap-[.55rem]; }
+	.preset-group-label { @apply text-[.72rem] font-extrabold tracking-[.08em] text-[#b9c3aa]; }
+	.preset-buttons { @apply flex flex-wrap gap-[.55rem]; }
 	.preset, .reset { @apply rounded-full border border-[#829184] bg-transparent px-3 py-[.45rem] text-[.82rem] hover:bg-[#3d5042]; }
+	.preset[aria-pressed="true"] { @apply border-[#ffca58] bg-[#ffca58] text-[#1a241d] hover:bg-[#ffca58]; }
 	.clock { @apply mt-4 grid min-h-[clamp(13rem,35vw,18rem)] place-content-center rounded-[.7rem] border-2 border-[#8ca072] bg-[#d6dfbd] text-center text-[#23311f]; }
+	.clock.is-urgent { @apply border-[#c96a2b] bg-[#f0d9b0]; }
+	.clock.is-done { @apply border-[#4f7a5a] bg-[#c7dbb8]; }
 	.clock-label { @apply mb-2 text-[.8rem] font-extrabold tracking-[.14em]; }
 	.clock-time { @apply font-mono text-[clamp(3.2rem,12vw,7.25rem)] leading-[.9] font-bold tracking-[-.1em] tabular-nums; }
 	.end-time { @apply mt-4 text-[.92rem]; }
