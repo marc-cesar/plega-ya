@@ -4,9 +4,54 @@ import Layout from '../layouts/Layout.astro';
 const title = '¿A qué hora me puedo ir? — Calculadora de horas de trabajo';
 const description =
 	'Calcula a qué hora termina tu jornada y cuánto tiempo te queda para irte. Introduce tu hora de entrada, jornada y descanso.';
+const structuredData = {
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'WebApplication',
+			name: 'Plega Ya',
+			url: 'https://plegaya.es/',
+			inLanguage: 'es-ES',
+			applicationCategory: 'UtilitiesApplication',
+			operatingSystem: 'Web',
+			description,
+			featureList: 'Calcula la hora de salida según la entrada, jornada y descanso.'
+		},
+		{
+			'@type': 'FAQPage',
+			mainEntity: [
+				{
+					'@type': 'Question',
+					name: '¿El descanso cuenta como tiempo trabajado?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Depende de tus condiciones laborales. Añádelo a la calculadora cuando no forme parte de tu jornada efectiva.'
+					}
+				},
+				{
+					'@type': 'Question',
+					name: '¿Funciona si termino al día siguiente?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Sí. La hora de salida se calcula a partir de un instante real, así que también contempla el cruce de medianoche.'
+					}
+				},
+				{
+					'@type': 'Question',
+					name: '¿Se guardan mis horarios?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Se recuerdan únicamente en el almacenamiento local de este navegador. No se envían a ningún servidor.'
+					}
+				}
+			]
+		}
+	]
+};
 ---
 
 <Layout {title} {description}>
+	<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 	<header class="site-header">
 		<a class="brand" href="/">
 			<img class="brand-mark" src="/favicon.svg" alt="" width="24" height="24" />
