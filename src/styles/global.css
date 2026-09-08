@@ -6,7 +6,7 @@
 }
 
 @layer components {
-	.site-header, main, .site-footer { @apply mx-auto w-[min(100%-2rem,68rem)]; }
+	.site-header, main, .site-footer { @apply mx-auto w-full max-w-[70rem] px-4; }
 	.site-header { @apply flex items-center justify-between py-5; }
 	.brand { @apply flex items-center gap-2 font-extrabold tracking-[-.04em] no-underline; }
 	.brand-mark { @apply h-6 w-6 shrink-0; }
@@ -19,6 +19,11 @@
 	label { @apply grid gap-[.4rem] text-[.82rem] font-bold; }
 	.input-hint { @apply text-[.72rem] font-normal text-[#b9c3aa]; }
 	input { @apply min-h-12 w-full rounded-[.45rem] border-2 border-[#829184] bg-[#e7eddc] px-[.55rem] py-[.45rem] text-[#17221a]; }
+	input[type="time"] {
+		-webkit-appearance: none;
+		appearance: none;
+	}
+	input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 	.presets { @apply my-[1.1rem] grid gap-[.7rem]; }
 	.preset-group { @apply flex flex-wrap items-center gap-[.55rem]; }
 	.preset-group-label { @apply text-[.72rem] font-extrabold tracking-[.08em] text-[#b9c3aa]; }
