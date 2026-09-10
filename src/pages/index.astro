@@ -156,7 +156,9 @@ const structuredData = {
 	const presetButtons = document.querySelectorAll<HTMLButtonElement>('.preset');
 	const inputs = [start, work, breakDuration];
 	const storageKey = 'plega-ya-schedule';
+	const DAY_MS = 24 * 60 * 60 * 1000;
 	let endTimestamp: number | null = null;
+	let startTimestamp: number | null = null;
 
 	function setInitialStartTime() {
 		const now = new Date();
@@ -183,6 +185,7 @@ const structuredData = {
 
 		if (schedule === null) {
 			endTimestamp = null;
+			startTimestamp = null;
 			clockLabel.textContent = 'INTRODUCE TU HORARIO';
 			clockTime.textContent = '--:--:--';
 			endTime.textContent = 'La hora de salida aparecerá aquí.';
@@ -190,6 +193,7 @@ const structuredData = {
 			return;
 		}
 
+		startTimestamp = schedule.startTimestamp;
 		endTimestamp = schedule.endTimestamp;
 		saveSchedule();
 		endTime.textContent = schedule.crossesMidnight
@@ -199,9 +203,16 @@ const structuredData = {
 	}
 
 	function refreshClock() {
-		if (endTimestamp === null) return;
+		if (endTimestamp === null || startTimestamp === null) return;
 
-		const remaining = endTimestamp - Date.now();
+		const now = Date.now();
+		const nextStartTimestamp = startTimestamp + DAY_MS;
+		if (now >= nextStartTimestamp && now > endTimestamp) {
+			update();
+			return;
+		}
+
+		const remaining = endTimestamp - now;
 
 		if (remaining > 0) {
 			clockTime.textContent = formatClock(remaining);
