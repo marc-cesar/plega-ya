@@ -58,8 +58,8 @@ export function formatClock(milliseconds: number): string {
 	return [hours, minutes, seconds].map((unit) => String(unit).padStart(2, '0')).join(':');
 }
 
-export function formatTime(timestamp: number): string {
-	return new Intl.DateTimeFormat('es-ES', {
+export function formatTime(timestamp: number, locale = 'es-ES'): string {
+	return new Intl.DateTimeFormat(locale, {
 		hour: '2-digit',
 		minute: '2-digit',
 		hour12: false,

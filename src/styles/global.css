@@ -10,7 +10,12 @@
 	.site-header { @apply flex items-center justify-between py-5; }
 	.brand { @apply flex items-center gap-2 font-extrabold tracking-[-.04em] no-underline; }
 	.brand-mark { @apply h-6 w-6 shrink-0; }
+	.header-end { @apply flex items-center gap-4; }
 	.privacy-note { @apply m-0 text-[.82rem] text-[#536057] max-sm:hidden; }
+	.lang-switcher { @apply flex gap-1 rounded-full border border-[#c7c4ae] bg-[#e9e8da] p-[.2rem]; }
+	.lang-option { @apply flex items-center gap-[.4rem] rounded-full px-[.6rem] py-[.3rem] text-[.78rem] font-bold text-[#536057] no-underline hover:bg-[#dcdac7]; }
+	.lang-option[aria-current="page"] { @apply bg-[#1a241d] text-[#f9f7ec] hover:bg-[#1a241d]; }
+	.lang-flag { @apply h-[.85rem] w-[1.275rem] shrink-0 rounded-[2px] shadow-[0_0_0_1px_rgba(0,0,0,.15)]; }
 	.hero { @apply max-w-[46rem] pt-9 pb-7 sm:pt-14; }
 	h1 { @apply mb-3 text-[clamp(2.5rem,8vw,5rem)] leading-[.95] tracking-[-.07em] [text-wrap:balance]; }
 	.lead { @apply max-w-[34rem] text-[clamp(1.05rem,2vw,1.25rem)] leading-7 text-[#536057] [text-wrap:pretty]; }

@@ -1,0 +1,277 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { languageMeta, translations, type Lang } from '../i18n/translations';
+
+interface Props {
+	lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = translations[lang];
+const meta = languageMeta[lang];
+const homeUrl = new URL(meta.path, Astro.site).toString();
+const clockConfig = JSON.stringify({ locale: meta.dateLocale, text: t.clock });
+
+const structuredData = {
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'WebApplication',
+			name: 'Plega Ya',
+			url: homeUrl,
+			inLanguage: meta.dateLocale,
+			applicationCategory: 'UtilitiesApplication',
+			operatingSystem: 'Web',
+			description: t.description,
+			featureList: t.featureList
+		},
+		{
+			'@type': 'FAQPage',
+			mainEntity: t.faq.map(({ q, a }) => ({
+				'@type': 'Question',
+				name: q,
+				acceptedAnswer: { '@type': 'Answer', text: a }
+			}))
+		}
+	]
+};
+---
+
+<Layout title={t.title} description={t.description} {lang}>
+	<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+	<header class="site-header">
+		<a class="brand" href={meta.path}>
+			<img class="brand-mark" src="/favicon.svg" alt="" width="24" height="24" />
+			PLEGA YA
+		</a>
+		<div class="header-end">
+			<p class="privacy-note">{t.privacyNote}</p>
+			<LanguageSwitcher {lang} />
+		</div>
+	</header>
+
+	<main>
+		<section class="hero" aria-labelledby="page-title">
+			<h1 id="page-title">{t.heading}</h1>
+			<p class="lead">{t.lead}</p>
+		</section>
+
+		<section class="calculator" aria-label={t.calculatorLabel} data-clock-config={clockConfig}>
+			<div class="inputs">
+				<label for="start">
+					{t.startLabel} <input id="start" name="start" type="time" required aria-describedby="start-hint" />
+					<span id="start-hint" class="input-hint">{t.startHint}</span>
+				</label>
+				<label for="work">
+					{t.workLabel} <input id="work" name="work" type="time" value="08:00" required aria-describedby="work-hint" />
+					<span id="work-hint" class="input-hint">{t.workHint}</span>
+				</label>
+				<label for="break">
+					{t.breakLabel} <input id="break" name="break" type="time" value="00:30" required aria-describedby="break-hint" />
+					<span id="break-hint" class="input-hint">{t.breakHint}</span>
+				</label>
+			</div>
+			<div class="presets">
+				<div class="preset-group">
+					<span class="preset-group-label" id="work-presets-label">{t.workLabel}</span>
+					<div class="preset-buttons" role="group" aria-labelledby="work-presets-label">
+						<button class="preset" type="button" data-work="08:00" aria-pressed="true">8 h</button>
+						<button class="preset" type="button" data-work="07:30" aria-pressed="false">7 h 30 min</button>
+						<button class="preset" type="button" data-work="07:00" aria-pressed="false">7 h</button>
+						<button class="preset" type="button" data-work="06:00" aria-pressed="false">6 h</button>
+					</div>
+				</div>
+				<div class="preset-group">
+					<span class="preset-group-label" id="break-presets-label">{t.breakLabel}</span>
+					<div class="preset-buttons" role="group" aria-labelledby="break-presets-label">
+						<button class="preset" type="button" data-break="00:00" aria-pressed="false">{t.noBreak}</button>
+						<button class="preset" type="button" data-break="00:15" aria-pressed="false">15 min</button>
+						<button class="preset" type="button" data-break="00:30" aria-pressed="true">30 min</button>
+						<button class="preset" type="button" data-break="00:45" aria-pressed="false">45 min</button>
+						<button class="preset" type="button" data-break="01:00" aria-pressed="false">1 h</button>
+					</div>
+				</div>
+			</div>
+			<div class="clock">
+				<p id="clock-label" class="clock-label" aria-live="polite">{t.clock.empty}</p>
+				<p id="clock-time" class="clock-time" aria-hidden="true">--:--:--</p>
+				<p id="end-time" class="end-time" aria-live="polite">{t.clock.endPlaceholder}</p>
+			</div>
+			<button id="reset" class="reset" type="button">{t.reset}</button>
+		</section>
+
+		<div class="content">
+			<section aria-labelledby="how-it-works">
+				<h2 id="how-it-works">{t.howTitle}</h2>
+				<p>{t.howText}</p>
+				<div class="formula" aria-label={t.formulaLabel}>
+					<span>{t.formula[0]}</span><strong>+</strong><span>{t.formula[1]}</span><strong>+</strong><span>{t.formula[2]}</span><strong>=</strong><span>{t.formula[3]}</span>
+				</div>
+			</section>
+
+			<section aria-labelledby="examples">
+				<h2 id="examples">{t.examplesTitle}</h2>
+				<div class="examples">
+					{t.examples.map((example) => <div class="example"><strong>{example.title}</strong><p>{example.text}</p></div>)}
+				</div>
+			</section>
+
+			<section aria-labelledby="faq">
+				<h2 id="faq">{t.faqTitle}</h2>
+				<div class="faq">
+					{t.faq.map(({ q, a }) => <details><summary>{q}</summary><p>{a}</p></details>)}
+				</div>
+			</section>
+		</div>
+	</main>
+
+	<footer class="site-footer">{t.footer}</footer>
+</Layout>
+
+<script>
+	import { formatClock, formatTime, getSchedule, URGENT_THRESHOLD_MS, JUST_FINISHED_THRESHOLD_MS } from '../lib/time';
+	import type { Translation } from '../i18n/translations';
+
+	const start = document.querySelector<HTMLInputElement>('#start')!;
+	const work = document.querySelector<HTMLInputElement>('#work')!;
+	const breakDuration = document.querySelector<HTMLInputElement>('#break')!;
+	const calculator = document.querySelector<HTMLElement>('.calculator')!;
+	const { locale, text } = JSON.parse(calculator.dataset.clockConfig!) as { locale: string; text: Translation['clock'] };
+	const clock = document.querySelector<HTMLElement>('.clock')!;
+	const clockLabel = document.querySelector<HTMLElement>('#clock-label')!;
+	const clockTime = document.querySelector<HTMLElement>('#clock-time')!;
+	const endTime = document.querySelector<HTMLElement>('#end-time')!;
+	const reset = document.querySelector<HTMLButtonElement>('#reset')!;
+	const presetButtons = document.querySelectorAll<HTMLButtonElement>('.preset');
+	const inputs = [start, work, breakDuration];
+	const storageKey = 'plega-ya-schedule';
+	const DAY_MS = 24 * 60 * 60 * 1000;
+	let endTimestamp: number | null = null;
+	let startTimestamp: number | null = null;
+
+	function setInitialStartTime() {
+		const now = new Date();
+		now.setMinutes(Math.floor(now.getMinutes() / 5) * 5, 0, 0);
+		start.value = now.toTimeString().slice(0, 5);
+	}
+
+	function saveSchedule() {
+		localStorage.setItem(storageKey, JSON.stringify({ start: start.value, work: work.value, break: breakDuration.value }));
+	}
+
+	function updatePresetStates() {
+		presetButtons.forEach((button) => {
+			const matches =
+				(button.dataset.work !== undefined && button.dataset.work === work.value) ||
+				(button.dataset.break !== undefined && button.dataset.break === breakDuration.value);
+			button.setAttribute('aria-pressed', String(matches));
+		});
+	}
+
+	function update() {
+		const schedule = getSchedule(start.value, work.value, breakDuration.value);
+		updatePresetStates();
+
+		if (schedule === null) {
+			endTimestamp = null;
+			startTimestamp = null;
+			clockLabel.textContent = text.empty;
+			clockTime.textContent = '--:--:--';
+			endTime.textContent = text.endPlaceholder;
+			clock.classList.remove('is-urgent', 'is-done');
+			return;
+		}
+
+		startTimestamp = schedule.startTimestamp;
+		endTimestamp = schedule.endTimestamp;
+		saveSchedule();
+		const endTemplate = schedule.crossesMidnight ? text.endTimeNextDay : text.endTime;
+		endTime.textContent = endTemplate.replace('{time}', formatTime(endTimestamp, locale));
+		refreshClock();
+	}
+
+	function refreshClock() {
+		if (endTimestamp === null || startTimestamp === null) return;
+
+		const now = Date.now();
+		const nextStartTimestamp = startTimestamp + DAY_MS;
+		if (now >= nextStartTimestamp && now > endTimestamp) {
+			update();
+			return;
+		}
+
+		const remaining = endTimestamp - now;
+
+		if (remaining > 0) {
+			clockTime.textContent = formatClock(remaining);
+			clockLabel.textContent = text.remaining;
+			clock.classList.toggle('is-urgent', remaining <= URGENT_THRESHOLD_MS);
+			clock.classList.remove('is-done');
+			return;
+		}
+
+		const overtime = Math.abs(remaining);
+		clock.classList.remove('is-urgent');
+		clock.classList.add('is-done');
+
+		if (overtime < JUST_FINISHED_THRESHOLD_MS) {
+			clockTime.textContent = '00:00:00';
+			clockLabel.textContent = text.canLeave;
+			return;
+		}
+
+		clockTime.textContent = formatClock(overtime);
+		clockLabel.textContent = text.overtime;
+	}
+
+	function restoreSchedule() {
+		const saved = localStorage.getItem(storageKey);
+		if (!saved) {
+			setInitialStartTime();
+			return;
+		}
+
+		try {
+			const schedule: unknown = JSON.parse(saved);
+			if (
+				typeof schedule === 'object' &&
+				schedule !== null &&
+				'start' in schedule &&
+				'work' in schedule &&
+				'break' in schedule &&
+				typeof schedule.start === 'string' &&
+				typeof schedule.work === 'string' &&
+				typeof schedule.break === 'string'
+			) {
+				start.value = schedule.start;
+				work.value = schedule.work;
+				breakDuration.value = schedule.break;
+				return;
+			}
+		} catch {
+			// Invalid local preferences are replaced by a safe initial value.
+		}
+		setInitialStartTime();
+	}
+
+	presetButtons.forEach((button) => {
+		button.addEventListener('click', () => {
+			if (button.dataset.work) work.value = button.dataset.work;
+			if (button.dataset.break) breakDuration.value = button.dataset.break;
+			update();
+		});
+	});
+	inputs.forEach((input) => input.addEventListener('input', update));
+	reset.addEventListener('click', () => {
+		localStorage.removeItem(storageKey);
+		work.value = '08:00';
+		breakDuration.value = '00:30';
+		setInitialStartTime();
+		update();
+	});
+
+	restoreSchedule();
+	update();
+	window.setInterval(refreshClock, 1000);
+</script>
