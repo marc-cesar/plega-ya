@@ -60,6 +60,13 @@
 	--toggle-hover: #1e2b22;
 }
 
+/* Cross-fade between themes (started with document.startViewTransition). */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 400ms;
+	animation-timing-function: ease;
+}
+
 @layer base {
 	html { @apply scroll-smooth motion-reduce:scroll-auto; }
 	input:focus-visible, button:focus-visible, a:focus-visible { @apply outline-3 -outline-offset-3 outline-(--focus); }
