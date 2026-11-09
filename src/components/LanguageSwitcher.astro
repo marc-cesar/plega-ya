@@ -1,0 +1,47 @@
+---
+import { languages, languageMeta, translations, type Lang } from '../i18n/translations';
+
+interface Props {
+	lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+
+<nav class="lang-switcher" aria-label={translations[lang].languageSwitcher}>
+	{
+		languages.map((code) => {
+			const meta = languageMeta[code];
+			const isCurrent = code === lang;
+			return (
+				<a
+					class="lang-option"
+					href={meta.path}
+					hreflang={meta.htmlLang}
+					lang={meta.htmlLang}
+					title={meta.name}
+					aria-current={isCurrent ? 'page' : undefined}
+				>
+					{code === 'es' ? (
+						<svg class="lang-flag" viewBox="0 0 3 2" aria-hidden="true">
+							<rect width="3" height="2" fill="#AA151B" />
+							<rect y="0.5" width="3" height="1" fill="#F1BF00" />
+						</svg>
+					) : (
+						<svg class="lang-flag" viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+							<clipPath id="uk-flag-clip">
+								<path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" />
+							</clipPath>
+							<path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+							<path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6" />
+							<path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uk-flag-clip)" stroke="#C8102E" stroke-width="4" />
+							<path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10" />
+							<path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6" />
+						</svg>
+					)}
+					<span>{meta.label}</span>
+				</a>
+			);
+		})
+	}
+</nav>

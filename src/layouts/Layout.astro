@@ -1,23 +1,28 @@
 ---
 import '../styles/global.css';
+import { defaultLang, languages, languageMeta, type Lang } from '../i18n/translations';
 
 interface Props {
 	title: string;
 	description: string;
+	lang?: Lang;
 }
 
-const { title, description } = Astro.props;
+const { title, description, lang = defaultLang } = Astro.props;
+const meta = languageMeta[lang];
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={meta.htmlLang}>
 	<head>
 		<meta name="google-site-verification" content="eVlCjz_qlTWVJB_nrYrx5raqDg9bEdUWg8AvIsp6Hgc" />
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonicalUrl} />
+		{languages.map((code) => <link rel="alternate" hreflang={languageMeta[code].htmlLang} href={new URL(languageMeta[code].path, Astro.site)} />)}
+		<link rel="alternate" hreflang="x-default" href={new URL(languageMeta[defaultLang].path, Astro.site)} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" sizes="any" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -37,7 +42,8 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonicalUrl} />
-		<meta property="og:locale" content="es_ES" />
+		<meta property="og:locale" content={meta.ogLocale} />
+		{languages.filter((code) => code !== lang).map((code) => <meta property="og:locale:alternate" content={languageMeta[code].ogLocale} />)}
 		<meta name="twitter:card" content="summary" />
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />

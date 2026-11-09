@@ -30,6 +30,10 @@
 	--card-bg: #e9e8da;
 	--toggle-border: #c7c4ae;
 	--toggle-hover: #e9e8da;
+	--lang-bg: #e9e8da;
+	--lang-hover: #dcdac7;
+	--lang-current-bg: #1a241d;
+	--lang-current-text: #f9f7ec;
 }
 
 :root[data-theme="dark"] {
@@ -58,6 +62,10 @@
 	--card-bg: #1b251e;
 	--toggle-border: #34443a;
 	--toggle-hover: #1e2b22;
+	--lang-bg: #1b251e;
+	--lang-hover: #26342b;
+	--lang-current-bg: #e6eadb;
+	--lang-current-text: #121a14;
 }
 
 /* Cross-fade between themes (started with document.startViewTransition). */
@@ -75,12 +83,17 @@
 @layer components {
 	.site-header, main, .site-footer { @apply mx-auto w-full max-w-[70rem] px-4; }
 	.site-header { @apply flex items-center justify-between gap-4 py-5; }
-	.header-actions { @apply flex items-center gap-4; }
+	.header-end { @apply flex items-center gap-3 sm:gap-4; }
 	.brand { @apply flex items-center gap-2 font-extrabold tracking-[-.04em] no-underline; }
 	.brand-mark { @apply h-6 w-6 shrink-0; }
 	.privacy-note { @apply m-0 text-[.82rem] text-(--muted) max-sm:hidden; }
+	.lang-switcher { @apply flex gap-1 rounded-full border border-(--toggle-border) bg-(--lang-bg) p-[.2rem]; }
+	.lang-option { @apply flex items-center gap-[.4rem] rounded-full px-[.6rem] py-[.3rem] text-[.78rem] font-bold text-(--muted) no-underline hover:bg-(--lang-hover); }
+	.lang-option[aria-current="page"] { @apply bg-(--lang-current-bg) text-(--lang-current-text) hover:bg-(--lang-current-bg); }
+	.lang-flag { @apply h-[.85rem] w-[1.275rem] shrink-0 rounded-[2px] shadow-[0_0_0_1px_rgba(0,0,0,.15)]; }
 	.theme-toggle { @apply flex min-h-10 items-center gap-2 rounded-full border border-(--toggle-border) bg-transparent px-3 py-[.4rem] text-[.82rem] font-bold text-(--page-text) hover:bg-(--toggle-hover); }
 	.theme-toggle svg { @apply h-4 w-4 shrink-0; }
+	.theme-toggle-label { @apply max-sm:hidden; }
 	.theme-toggle .icon-sun { @apply hidden; }
 	:root[data-theme="dark"] .theme-toggle .icon-sun { @apply block; }
 	:root[data-theme="dark"] .theme-toggle .icon-moon { @apply hidden; }
