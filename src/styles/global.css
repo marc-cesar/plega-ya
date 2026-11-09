@@ -1,29 +1,110 @@
 @import "tailwindcss";
 
+/* Theme colors. Light is the default; dark applies when <html data-theme="dark">. */
+:root {
+	color-scheme: light;
+	--page-bg: #f3f0e4;
+	--page-text: #1d271f;
+	--muted: #536057;
+	--focus: #ffca58;
+	--accent: #ffca58;
+	--accent-text: #1a241d;
+	--calc-border: #1a241d;
+	--calc-bg: #27372c;
+	--calc-text: #f9f7ec;
+	--calc-shadow: #c7c4ae;
+	--calc-hint: #b9c3aa;
+	--input-border: #829184;
+	--input-bg: #e7eddc;
+	--input-text: #17221a;
+	--preset-hover: #3d5042;
+	--clock-border: #8ca072;
+	--clock-bg: #d6dfbd;
+	--clock-text: #23311f;
+	--clock-urgent-border: #c96a2b;
+	--clock-urgent-bg: #f0d9b0;
+	--clock-done-border: #4f7a5a;
+	--clock-done-bg: #c7dbb8;
+	--chip-bg: #dfe5cf;
+	--card-border: #718554;
+	--card-bg: #e9e8da;
+	--toggle-border: #c7c4ae;
+	--toggle-hover: #e9e8da;
+	--lang-bg: #e9e8da;
+	--lang-hover: #dcdac7;
+	--lang-current-bg: #1a241d;
+	--lang-current-text: #f9f7ec;
+}
+
+:root[data-theme="dark"] {
+	color-scheme: dark;
+	--page-bg: #121a14;
+	--page-text: #e6eadb;
+	--muted: #9daa9f;
+	--calc-border: #070b08;
+	--calc-bg: #1e2b22;
+	--calc-text: #f3f1e6;
+	--calc-shadow: #070b08;
+	--calc-hint: #a3b097;
+	--input-border: #5f7062;
+	--input-bg: #2a3a2f;
+	--input-text: #eef2e4;
+	--preset-hover: #314238;
+	--clock-border: #6f8457;
+	--clock-bg: #26321f;
+	--clock-text: #e3ebcb;
+	--clock-urgent-border: #d07a3c;
+	--clock-urgent-bg: #3b2a16;
+	--clock-done-border: #5e9069;
+	--clock-done-bg: #1c3324;
+	--chip-bg: #253129;
+	--card-border: #7d9360;
+	--card-bg: #1b251e;
+	--toggle-border: #34443a;
+	--toggle-hover: #1e2b22;
+	--lang-bg: #1b251e;
+	--lang-hover: #26342b;
+	--lang-current-bg: #e6eadb;
+	--lang-current-text: #121a14;
+}
+
+/* Cross-fade between themes (started with document.startViewTransition). */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 400ms;
+	animation-timing-function: ease;
+}
+
 @layer base {
 	html { @apply scroll-smooth motion-reduce:scroll-auto; }
-	input:focus-visible, button:focus-visible, a:focus-visible { @apply outline-3 -outline-offset-3 outline-[#ffca58]; }
+	input:focus-visible, button:focus-visible, a:focus-visible { @apply outline-3 -outline-offset-3 outline-(--focus); }
 }
 
 @layer components {
 	.site-header, main, .site-footer { @apply mx-auto w-full max-w-[70rem] px-4; }
-	.site-header { @apply flex items-center justify-between py-5; }
+	.site-header { @apply flex items-center justify-between gap-4 py-5; }
+	.header-end { @apply flex items-center gap-3 sm:gap-4; }
 	.brand { @apply flex items-center gap-2 font-extrabold tracking-[-.04em] no-underline; }
 	.brand-mark { @apply h-6 w-6 shrink-0; }
-	.header-end { @apply flex items-center gap-4; }
-	.privacy-note { @apply m-0 text-[.82rem] text-[#536057] max-sm:hidden; }
-	.lang-switcher { @apply flex gap-1 rounded-full border border-[#c7c4ae] bg-[#e9e8da] p-[.2rem]; }
-	.lang-option { @apply flex items-center gap-[.4rem] rounded-full px-[.6rem] py-[.3rem] text-[.78rem] font-bold text-[#536057] no-underline hover:bg-[#dcdac7]; }
-	.lang-option[aria-current="page"] { @apply bg-[#1a241d] text-[#f9f7ec] hover:bg-[#1a241d]; }
+	.privacy-note { @apply m-0 text-[.82rem] text-(--muted) max-sm:hidden; }
+	.lang-switcher { @apply flex gap-1 rounded-full border border-(--toggle-border) bg-(--lang-bg) p-[.2rem]; }
+	.lang-option { @apply flex items-center gap-[.4rem] rounded-full px-[.6rem] py-[.3rem] text-[.78rem] font-bold text-(--muted) no-underline hover:bg-(--lang-hover); }
+	.lang-option[aria-current="page"] { @apply bg-(--lang-current-bg) text-(--lang-current-text) hover:bg-(--lang-current-bg); }
 	.lang-flag { @apply h-[.85rem] w-[1.275rem] shrink-0 rounded-[2px] shadow-[0_0_0_1px_rgba(0,0,0,.15)]; }
+	.theme-toggle { @apply flex min-h-10 items-center gap-2 rounded-full border border-(--toggle-border) bg-transparent px-3 py-[.4rem] text-[.82rem] font-bold text-(--page-text) hover:bg-(--toggle-hover); }
+	.theme-toggle svg { @apply h-4 w-4 shrink-0; }
+	.theme-toggle-label { @apply max-sm:hidden; }
+	.theme-toggle .icon-sun { @apply hidden; }
+	:root[data-theme="dark"] .theme-toggle .icon-sun { @apply block; }
+	:root[data-theme="dark"] .theme-toggle .icon-moon { @apply hidden; }
 	.hero { @apply max-w-[46rem] pt-9 pb-7 sm:pt-14; }
 	h1 { @apply mb-3 text-[clamp(2.5rem,8vw,5rem)] leading-[.95] tracking-[-.07em] [text-wrap:balance]; }
-	.lead { @apply max-w-[34rem] text-[clamp(1.05rem,2vw,1.25rem)] leading-7 text-[#536057] [text-wrap:pretty]; }
-	.calculator { @apply rounded-[1.25rem] border-[.35rem] border-[#1a241d] bg-[#27372c] p-[clamp(1rem,3vw,2rem)] text-[#f9f7ec] shadow-[.55rem_.55rem_0_#c7c4ae]; }
+	.lead { @apply max-w-[34rem] text-[clamp(1.05rem,2vw,1.25rem)] leading-7 text-(--muted) [text-wrap:pretty]; }
+	.calculator { @apply rounded-[1.25rem] border-[.35rem] border-(--calc-border) bg-(--calc-bg) p-[clamp(1rem,3vw,2rem)] text-(--calc-text) shadow-[.55rem_.55rem_0_var(--calc-shadow)]; }
 	.inputs { @apply grid grid-cols-1 gap-[.9rem] sm:grid-cols-3; }
 	label { @apply grid gap-[.4rem] text-[.82rem] font-bold; }
-	.input-hint { @apply text-[.72rem] font-normal text-[#b9c3aa]; }
-	input { @apply min-h-12 w-full rounded-[.45rem] border-2 border-[#829184] bg-[#e7eddc] px-[.55rem] py-[.45rem] text-[#17221a]; }
+	.input-hint { @apply text-[.72rem] font-normal text-(--calc-hint); }
+	input { @apply min-h-12 w-full rounded-[.45rem] border-2 border-(--input-border) bg-(--input-bg) px-[.55rem] py-[.45rem] text-(--input-text); }
 	input[type="time"] {
 		-webkit-appearance: none;
 		appearance: none;
@@ -31,13 +112,13 @@
 	input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 	.presets { @apply my-[1.1rem] grid gap-[.7rem]; }
 	.preset-group { @apply flex flex-wrap items-center gap-[.55rem]; }
-	.preset-group-label { @apply text-[.72rem] font-extrabold tracking-[.08em] text-[#b9c3aa]; }
+	.preset-group-label { @apply text-[.72rem] font-extrabold tracking-[.08em] text-(--calc-hint); }
 	.preset-buttons { @apply flex flex-wrap gap-[.55rem]; }
-	.preset, .reset { @apply rounded-full border border-[#829184] bg-transparent px-3 py-[.45rem] text-[.82rem] hover:bg-[#3d5042]; }
-	.preset[aria-pressed="true"] { @apply border-[#ffca58] bg-[#ffca58] text-[#1a241d] hover:bg-[#ffca58]; }
-	.clock { @apply mt-4 grid min-h-[clamp(13rem,35vw,18rem)] place-content-center rounded-[.7rem] border-2 border-[#8ca072] bg-[#d6dfbd] text-center text-[#23311f]; }
-	.clock.is-urgent { @apply border-[#c96a2b] bg-[#f0d9b0]; }
-	.clock.is-done { @apply border-[#4f7a5a] bg-[#c7dbb8]; }
+	.preset, .reset { @apply rounded-full border border-(--input-border) bg-transparent px-3 py-[.45rem] text-[.82rem] hover:bg-(--preset-hover); }
+	.preset[aria-pressed="true"] { @apply border-(--accent) bg-(--accent) text-(--accent-text) hover:bg-(--accent); }
+	.clock { @apply mt-4 grid min-h-[clamp(13rem,35vw,18rem)] place-content-center rounded-[.7rem] border-2 border-(--clock-border) bg-(--clock-bg) text-center text-(--clock-text); }
+	.clock.is-urgent { @apply border-(--clock-urgent-border) bg-(--clock-urgent-bg); }
+	.clock.is-done { @apply border-(--clock-done-border) bg-(--clock-done-bg); }
 	.clock-label { @apply mb-2 text-[.8rem] font-extrabold tracking-[.14em]; }
 	.clock-time { @apply font-mono text-[clamp(3.2rem,12vw,7.25rem)] leading-[.9] font-bold tracking-[-.1em] tabular-nums; }
 	.end-time { @apply mt-4 text-[.92rem]; }
@@ -46,11 +127,11 @@
 	.content section { @apply max-w-[44rem]; }
 	h2 { @apply text-[clamp(1.55rem,4vw,2.25rem)] tracking-[-.045em]; }
 	.formula { @apply flex flex-wrap items-center gap-[.45rem] font-mono text-base font-bold; }
-	.formula span { @apply rounded-[.4rem] bg-[#dfe5cf] px-[.8rem] py-[.6rem]; }
+	.formula span { @apply rounded-[.4rem] bg-(--chip-bg) px-[.8rem] py-[.6rem]; }
 	.examples, .faq { @apply grid gap-[.9rem]; }
-	.example, details { @apply border-l-[3px] border-[#718554] bg-[#e9e8da] px-4 py-[.8rem]; }
+	.example, details { @apply border-l-[3px] border-(--card-border) bg-(--card-bg) px-4 py-[.8rem]; }
 	.example p { @apply m-0; }
 	summary { @apply cursor-pointer font-bold; }
-	details p { @apply mt-[.7rem] mb-0 leading-relaxed text-[#536057]; }
-	.site-footer { @apply py-6 pb-10 text-[.85rem] text-[#536057]; }
+	details p { @apply mt-[.7rem] mb-0 leading-relaxed text-(--muted); }
+	.site-footer { @apply py-6 pb-10 text-[.85rem] text-(--muted); }
 }
